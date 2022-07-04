@@ -7,12 +7,19 @@ from distinctipy import distinctipy
 
 class Decodoku():
     
-    def __init__(self, p=0.1, k=2, L=10, process=None):
+    def __init__(self, p=0.1, k=2, L=10, process=None, errors=None):
         
         self.p = p
         self.k = k
         self.L = L
         self.process = process
+        self.decoder = (self.process!=None)
+        
+        if errors:
+            self.errors = errors
+        else:
+            self.errors = []
+            
 
         self.d = L-1
         self.T = L+1
@@ -28,36 +35,44 @@ class Decodoku():
             for y in range(self.L):
                 syndrome[x,y] = 0
         
-        error_num = 1
-        for _ in range(2*self.L**2):
-            error_num += random()<self.p
-        for _ in range(error_num):
-            x0 = choice(range(self.L))
-            y0 = choice(range(self.L))
-            if choice([True,False]):
-                dx = []
-                if x0>0:
-                    dx.append(-1)
-                if x0<(self.L-1):
-                    dx.append(+1)
-                x1 = x0 + choice(dx)
-                y1 = y0
-            else:
-                dy = []
-                if y0>0:
-                    dy.append(-1)
-                if y0<(self.L-1):
-                    dy.append(+1)
-                x1 = x0
-                y1 = y0 + choice(dy)
+        if self.errors:
+            error_num = len(self.errors)
+        else:
+            error_num = 1
+            for _ in range(2*self.L**2):
+                error_num += random()<self.p
+            for _ in range(error_num):
+                
+                x0 = choice(range(self.L))
+                y0 = choice(range(self.L))
+                
+                if choice([True,False]):
+                    dx = []
+                    if x0>0:
+                        dx.append(-1)
+                    if x0<(self.L-1):
+                        dx.append(+1)
+                    x1 = x0 + choice(dx)
+                    y1 = y0
+                else:
+                    dy = []
+                    if y0>0:
+                        dy.append(-1)
+                    if y0<(self.L-1):
+                        dy.append(+1)
+                    x1 = x0
+                    y1 = y0 + choice(dy)
+                self.errors.append((x0,y0,x1,y1))
+            
+        for x0, y0, x1, y1 in self.errors:
             if x0 not in [0, self.L-1] or x1 not in [0, self.L-1]:
                 e = choice(range(1,self.k))
                 syndrome[x0,y0] += e
                 syndrome[x1,y1] += self.k-e
 
         # generate colours for clusters
-        input_colors = [(0,0,1), (1,2/3,0), (1,1,1), (0,0,0)]
-        output_colors = distinctipy.get_colors(error_num, input_colors)
+        input_colors = [(0,0,1), (1,2/3,0), (1,1,1), (0.8,0.8,0.8), (0,0,0)]
+        output_colors = distinctipy.get_colors(error_num+1, input_colors)
         self.error_colors = []
         for color in output_colors:
             hcolor = '#'
@@ -154,7 +169,10 @@ class Decodoku():
                     node['value'] = syndrome[x,y]%self.k
                     node['highlighted'] = True
                 else:
-                    highlighted_color.append('cornflowerblue')
+                    if self.decoder:
+                        highlighted_color.append('#bbbbbb')
+                    else:
+                        highlighted_color.append('cornflowerblue')
         self.node_color = highlighted_color
 
     def start(self, engine):
@@ -265,7 +283,7 @@ class Decodoku():
         self.update_graph()
 
     def draw_graph(self, original=False, clusters=True):
-        if self.process and clusters:
+        if self.decoder and clusters:
             parity, clusters = self.process(self)
         else:
             parity, clusters = None, None
