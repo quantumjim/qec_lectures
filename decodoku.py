@@ -1,17 +1,16 @@
 from qiskit_textbook.games.qiskit_game_engine import QiskitGameEngine
 from qiskit_qec.decoders import DecodingGraph
 from random import random, choice
+from numpy.random import poisson
 from retworkx.visualization import mpl_draw
-from distinctipy import distinctipy
-
 
 class Decodoku():
     
-    def __init__(self, p=0.1, k=2, L=10, process=None, errors=None):
+    def __init__(self, p=0.1, k=2, d=10, process=None, errors=None):
         
         self.p = p
         self.k = k
-        self.L = L
+        self.d = d
         self.process = process
         self.decoder = (self.process!=None)
         
@@ -20,9 +19,7 @@ class Decodoku():
         else:
             self.errors = []
             
-
-        self.d = L-1
-        self.T = L+1
+        self.L = d+1
         
         self.generate_syndrome()
         self.generate_graph()
@@ -38,9 +35,7 @@ class Decodoku():
         if self.errors:
             error_num = len(self.errors)
         else:
-            error_num = 1
-            for _ in range(2*self.L**2):
-                error_num += random()<self.p
+            error_num = poisson(self.p*2*self.L**2)
             for _ in range(error_num):
                 
                 x0 = choice(range(self.L))
@@ -71,17 +66,9 @@ class Decodoku():
                 syndrome[x1,y1] += self.k-e
 
         # generate colours for clusters
-        input_colors = [(0,0,1), (1,2/3,0), (1,1,1), (0.8,0.8,0.8), (0,0,0)]
-        output_colors = distinctipy.get_colors(error_num+1, input_colors)
-        self.error_colors = []
-        for color in output_colors:
-            hcolor = '#'
-            for c in color:
-                hc = hex(int(255*c))[2::]
-                if len(hc)==1:
-                    hc = '0'+hc
-                hcolor += hc
-            self.error_colors.append(hcolor)
+        self.error_colors = ['#00ff00', '#fc04c5', '#00ffff', '#007f7f', '#bc020f', '#767202', '#8156f8', '#51ee7c', '#ee667d', '#55017c', '#007fff', '#dcfe44', '#ff7fff', '#7f7f7f', '#7fff00', '#5fb6df', '#009f08', '#7f00ff', '#fe4b0b', '#163747', '#0330aa', '#7fffff', '#a6b231', '#a4369c', '#eeae74', '#af4c3c', '#01c6c1', '#692801', '#fa2261', '#02da4d', '#52b846', '#db45e1', '#1c3ef8', '#3c72bd', '#055902', '#a58eca', '#99c689', '#41f4ca', '#b2006a', '#387144', '#6d365e', '#f9ef98', '#00007f', '#410dc2', '#3cb490', '#b1f9a7', '#8dec4c', '#d87c1c', '#03fa97', '#4dce00', '#ff0000', '#ffff00', '#c113f0', '#c7d808', '#8e02b1', '#3c0538', '#633eb1', '#1ec5fd', '#e790b8', '#38fe31', '#a8b6fd', '#a47e47', '#2a4d7f', '#009844', '#527bfd', '#840336', '#fdb7ee', '#c43304', '#c8d45f', '#7ddec0', '#f63b9f', '#c2f8f9', '#232c0b', '#b8968b', '#77a405', '#5f29f5', '#4f452a', '#0890b2', '#b764ac', '#3e8c0a', '#f4d431', '#0259cd', '#ce3c74', '#09ce12', '#6a9aac', '#962fd7', '#cc05a1', '#407f7a', '#dda737', '#89d204', '#b06efa', '#6b8836', '#04c380', '#21a0dc', '#7e66bf', '#a05505', '#84a763', '#fd1ffe', '#fb5149', '#c02140', '#f98148', '#7f0000', '#010f34', '#d197f2', '#c1a200', '#430501', '#e7033e', '#8194fe', '#53ddfc', '#a1597a', '#06f8c6', '#f7c3aa', '#0e08ac', '#7f6037', '#087427', '#252373', '#81fd8f', '#93b7c7', '#005d54', '#3e5c01', '#68da2e', '#fc67bb', '#ff007f', '#f5e5d2', '#635a76', '#4402f3', '#fe2422', '#37d0b4', '#353ccc', '#2bac25', '#1bfe6a', '#8e2c2c', '#9c2762', '#f9d569', '#ff7f00', '#081ad7', '#2ca765', '#83d0f9', '#db74dc', '#d16b52', '#392d9e', '#34d331', '#7a1f92', '#6ac1a1', '#b1fc0f', '#c8fc76', '#c8d998', '#aa7b01', '#d225c7', '#6f85d6', '#34cd6e', '#a8e7d7', '#bdadb4', '#7311d5', '#bfad63', '#7ccd63', '#1062a2', '#2965fa', '#d3521e', '#a652d8', '#63fd56', '#504dfd', '#fb8987', '#2ff4fc', '#d8ccfe', '#023f20', '#53fb0d', '#3897ad', '#651f3d', '#04fa34', '#79b82b', '#36f7a0', '#b63cf9', '#7d0a69', '#147ad5', '#a7d731', '#81519a', '#cf47a2', '#459648', '#63a481', '#fc59f0', '#62fbad', '#e33240', '#d5906a', '#2aea03', '#443251', '#21055f', '#cff6c9', '#dcbb11', '#5d6f9e', '#579ffd', '#565dd8', '#8afebd', '#aa7b73', '#f8d802', '#047c00', '#47e151', '#d4166d', '#14b3a5', '#949221']
+        if len(self.error_colors)<error_num:
+            self.error_colors = self.error_colors*(1+int(error_num/len(self.error_colors)))
         
         # compute boundary parities and scrub their syndromes
         parity = [0,0]
@@ -108,37 +95,37 @@ class Decodoku():
             for y in range(self.L):
                 e = x-1
                 t = self.L-1-y
-                dg.graph.add_node({'time':t, 'element':e, 'is_boundary':False})
+                dg.graph.add_node({'y':t, 'x':e, 'is_boundary':False})
                 pos.append((e,-t))
         for e in [0,1]:
-            dg.graph.add_node({'time':0, 'element':e, 'is_boundary':True})
+            dg.graph.add_node({'y':0, 'x':e, 'is_boundary':True})
             pos.append((d*(e==1) -2*(e==0), -(self.L-1)/2))
 
         nodes = dg.graph.nodes()
         # connect edges to boundary nodes
         for y in range(self.L):
             t = y
-            n0 = nodes.index({'time':0, 'element':0, 'is_boundary':True})
-            n1 = nodes.index({'time':t, 'element':0, 'is_boundary':False})
+            n0 = nodes.index({'y':0, 'x':0, 'is_boundary':True})
+            n1 = nodes.index({'y':t, 'x':0, 'is_boundary':False})
             dg.graph.add_edge(n0, n1, None)
-            n0 = nodes.index({'time':0, 'element':1, 'is_boundary':True})
-            n1 = nodes.index({'time':t, 'element':d-2, 'is_boundary':False})
+            n0 = nodes.index({'y':0, 'x':1, 'is_boundary':True})
+            n1 = nodes.index({'y':t, 'x':d-2, 'is_boundary':False})
             dg.graph.add_edge(n0, n1, None)
         # connect bulk nodes with space-like edges
         for y in range(self.L):
             for x in range(1,self.L-2):
                 t = y
                 e = x-1
-                n0 = nodes.index({'time':t, 'element':e, 'is_boundary':False})
-                n1 = nodes.index({'time':t, 'element':e+1, 'is_boundary':False})
+                n0 = nodes.index({'y':t, 'x':e, 'is_boundary':False})
+                n1 = nodes.index({'y':t, 'x':e+1, 'is_boundary':False})
                 dg.graph.add_edge(n0, n1, None)
         # connect bulk nodes with time-like edges
         for y in range(self.L-1):
             for x in range(1,self.L-1):
                 t = y
                 e = x-1
-                n0 = nodes.index({'time':t, 'element':e, 'is_boundary':False})
-                n1 = nodes.index({'time':t+1, 'element':e, 'is_boundary':False})
+                n0 = nodes.index({'y':t, 'x':e, 'is_boundary':False})
+                n1 = nodes.index({'y':t+1, 'x':e, 'is_boundary':False})
                 dg.graph.add_edge(n0, n1, None)
                 
         self.decoding_graph = dg
@@ -162,8 +149,8 @@ class Decodoku():
             if node['is_boundary']:
                 highlighted_color.append('orange')
             else:
-                x = node['element']+1
-                y = node['time']
+                x = node['x']+1
+                y = node['y']
                 if (syndrome[x,y]%self.k)>0:
                     highlighted_color.append('red')
                     node['value'] = syndrome[x,y]%self.k
@@ -277,9 +264,14 @@ class Decodoku():
                         engine.screen.pixel[x,y].set_color('red')
 
             if engine.controller['next'].value:
-                self.generate_syndrome()
+                self.restart()
                 engine.start(engine)
 
+        self.update_graph()
+        
+    def restart(self):
+        self.errors = []
+        self.generate_syndrome()
         self.update_graph()
 
     def draw_graph(self, original=False, clusters=True):
@@ -296,7 +288,7 @@ class Decodoku():
         
         def get_label(node):
             if node['is_boundary'] and parity:
-                return str(parity[node['element']])
+                return str(parity[node['x']])
             elif node['highlighted'] and 'value' in node and self.k!=2:
                 return str(node['value'])
             else:
