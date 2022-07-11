@@ -98,17 +98,17 @@ class Decodoku():
                 dg.graph.add_node({'y':t, 'x':e, 'is_boundary':False})
                 pos.append((e,-t))
         for e in [0,1]:
-            dg.graph.add_node({'y':0, 'x':e, 'is_boundary':True})
+            dg.graph.add_node({'y':0, 'x':(d-1)*(e==1) -1*(e==0), 'element':e, 'is_boundary':True})
             pos.append((d*(e==1) -2*(e==0), -(self.L-1)/2))
 
         nodes = dg.graph.nodes()
         # connect edges to boundary nodes
         for y in range(self.L):
             t = y
-            n0 = nodes.index({'y':0, 'x':0, 'is_boundary':True})
+            n0 = nodes.index({'y':0, 'x':-1, 'element':0, 'is_boundary':True})
             n1 = nodes.index({'y':t, 'x':0, 'is_boundary':False})
             dg.graph.add_edge(n0, n1, None)
-            n0 = nodes.index({'y':0, 'x':1, 'is_boundary':True})
+            n0 = nodes.index({'y':0, 'x':d-1, 'element':1, 'is_boundary':True})
             n1 = nodes.index({'y':t, 'x':d-2, 'is_boundary':False})
             dg.graph.add_edge(n0, n1, None)
         # connect bulk nodes with space-like edges
@@ -288,7 +288,7 @@ class Decodoku():
         
         def get_label(node):
             if node['is_boundary'] and parity:
-                return str(parity[node['x']])
+                return str(parity[node['element']])
             elif node['highlighted'] and 'value' in node and self.k!=2:
                 return str(node['value'])
             else:
