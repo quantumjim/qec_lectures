@@ -11,3 +11,11 @@ You can also check out the notebook dedicated to just playing Decodoku.
 
 * [Decodoku](decodoku.ipynb)
 
+To run Decodoku, you'll need to install Qiskit-QEC via
+
+`pip install --no-cache --upgrade https://github.com/qiskit-community/qiskit-qec/archive/decodoku.zip`
+
+See also the following recorded lectures:
+
+* [Repetition Codes](https://www.youtube.com/watch?v=AuDfq7j_W7E)
+* [Surface Codes](https://www.youtube.com/watch?v=IdZkxX-Qank)
