@@ -11,9 +11,7 @@ You can also check out the notebook dedicated to just playing Decodoku.
 
 * [Decodoku](decodoku.ipynb)
 
-To run Decodoku, you'll need to install Qiskit-QEC via
-
-`pip install --no-cache --upgrade https://github.com/qiskit-community/qiskit-qec/archive/decodoku.zip`
+To run Decodoku, you'll need to install [Qiskit-QEC](https://github.com/qiskit-community/qiskit-qec).
 
 See also the following recorded lectures:
 
