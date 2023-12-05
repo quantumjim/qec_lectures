@@ -11,14 +11,12 @@ You can also check out the notebook dedicated to just playing Decodoku.
 
 * [Decodoku](decodoku.ipynb)
 
-To run Decodoku, you'll need to install this version of [Qiskit-QEC](https://github.com/quantumjim/qiskit-qec-decodoku).
-
 See also the following recorded lectures:
 
 * [Repetition Codes](https://www.youtube.com/watch?v=AuDfq7j_W7E)
 * [Surface Codes](https://www.youtube.com/watch?v=IdZkxX-Qank)
 
-And these live coding streams:
+And these live-coding streams:
 
 * [Playing with Quantum Error Correction - Part 1](https://www.youtube.com/watch?v=e-EaIs-Qr78&list=PLOFEBzvs-VvodTkP_rfrs3RWdeWE9aNRD&index=6)
 * [Playing with Quantum Error Correction - Part 2](https://www.youtube.com/watch?v=Bzh7DSbCJJ0&list=PLOFEBzvs-VvodTkP_rfrs3RWdeWE9aNRD&index=7)
